@@ -8,7 +8,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use frame_support::{
 		sp_runtime::traits::Hash,
-		traits::{ Randomness, Currency, tokens::ExistenceRequirement },
+		traits::{ Randomness, Currency, tokens::ExistenceRequirement, UnixTime },
 		transactional
 	};
 	use sp_io::hashing::blake2_128;
@@ -30,6 +30,7 @@ pub mod pallet {
 		pub price: Option<BalanceOf<T>>,
 		pub gender: Gender,
 		pub owner: AccountOf<T>,
+		pub created_date: u128,
 	}
 
 	// Enum declaration for Gender.
@@ -59,6 +60,8 @@ pub mod pallet {
 
 		/// The type of Randomness we want to specify for this pallet.
 		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
+		
+		type TimeProvider: UnixTime;
 	}
 
 	// Errors.
@@ -329,6 +332,7 @@ pub mod pallet {
 				price: None,
 				gender: gender.unwrap_or_else(Self::gen_gender),
 				owner: owner.clone(),
+				created_date: T::TimeProvider::now().as_micros(),
 			};
 
 			let kitty_id = T::Hashing::hash_of(&kitty);
