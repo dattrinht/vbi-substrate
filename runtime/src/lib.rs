@@ -275,6 +275,7 @@ impl pallet_kitties::Config for Runtime {
 	type KittyRandomness = RandomnessCollectiveFlip;
 	type MaxKittiesOwned = MaxKittiesOwned;
 	type TimeProvider = Timestamp;
+	type WeightInfo = pallet_kitties::weights::WeightInfo<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

@@ -32,6 +32,8 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+use crate as pallet_kitties;
+
 /// Weight functions for `pallet_kitties`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_kitties::WeightInfo for WeightInfo<T> {

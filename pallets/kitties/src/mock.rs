@@ -96,6 +96,7 @@ impl pallet_kitties::Config for Test {
 	type KittyRandomness = RandomnessCollectiveFlip;
 	type MaxKittiesOwned = MaxKittiesOwned;
 	type TimeProvider = Timestamp;
+	type WeightInfo = pallet_kitties::weights::WeightInfo<Test>;
 }
 
 impl pallet_randomness_collective_flip::Config for Test {}

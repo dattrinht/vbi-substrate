@@ -11,6 +11,8 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+pub mod weights;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
@@ -71,6 +73,8 @@ pub mod pallet {
 		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
 		
 		type TimeProvider: UnixTime;
+
+		type WeightInfo: WeightInfo;
 	}
 
 	// Errors.
@@ -110,6 +114,11 @@ pub mod pallet {
 		Transferred(T::AccountId, T::AccountId, T::Hash),
 		/// A Kitty was successfully bought. \[buyer, seller, kitty_id, bid_price\]
 		Bought(T::AccountId, T::AccountId, T::Hash, BalanceOf<T>),
+	}
+
+	// Weight Info
+	pub trait WeightInfo {
+		fn create_kitty(_s: u32, ) -> Weight;
 	}
 
 	// Storage items.
@@ -166,7 +175,7 @@ pub mod pallet {
 		/// Create a new unique kitty.
 		///
 		/// The actual kitty creation is done in the `mint()` function.
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::create_kitty(100))]
 		pub fn create_kitty(origin: OriginFor<T>) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
