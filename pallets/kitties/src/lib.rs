@@ -2,6 +2,12 @@
 
 pub use pallet::*;
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
@@ -34,7 +40,7 @@ pub mod pallet {
 	}
 
 	// Enum declaration for Gender.
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+	#[derive(Clone, Encode, Decode, PartialEq, Copy, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	pub enum Gender {
 		Male,
@@ -56,7 +62,7 @@ pub mod pallet {
 
 		/// The maximum amount of Kitties a single account can own.
 		#[pallet::constant]
-		type MaxKittyOwned: Get<u32>;
+		type MaxKittiesOwned: Get<u32>;
 
 		/// The type of Randomness we want to specify for this pallet.
 		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
@@ -70,7 +76,7 @@ pub mod pallet {
 		/// Handles arithmetic overflow when incrementing the Kitty counter.
 		KittyCntOverflow,
 		/// An account cannot own more Kitties than `MaxKittyCount`.
-		ExceedMaxKittyOwned,
+		ExceedMaxKittiesOwned,
 		/// Buyer cannot be the owner.
 		BuyerIsKittyOwner,
 		/// Cannot transfer a kitty to its owner.
@@ -119,7 +125,7 @@ pub mod pallet {
 	#[pallet::getter(fn kitties_owned)]
 	/// Keeps track of what accounts own what Kitty.
 	pub(super) type KittiesOwned<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, BoundedVec<T::Hash, T::MaxKittyOwned>, ValueQuery>;
+		StorageMap<_, Twox64Concat, T::AccountId, BoundedVec<T::Hash, T::MaxKittiesOwned>, ValueQuery>;
 
 	// Our pallet's genesis configuration.
 	#[pallet::genesis_config]
@@ -213,7 +219,7 @@ pub mod pallet {
 
 			// Verify the recipient has the capacity to receive one more kitty
 			let to_owned = <KittiesOwned<T>>::get(&to);
-			ensure!((to_owned.len() as u32) < T::MaxKittyOwned::get(), <Error<T>>::ExceedMaxKittyOwned);
+			ensure!((to_owned.len() as u32) < T::MaxKittiesOwned::get(), <Error<T>>::ExceedMaxKittiesOwned);
 
 			Self::transfer_kitty_to(&kitty_id, &to)?;
 
@@ -252,7 +258,7 @@ pub mod pallet {
 
 			// Verify the buyer has the capacity to receive one more kitty
 			let to_owned = <KittiesOwned<T>>::get(&buyer);
-			ensure!((to_owned.len() as u32) < T::MaxKittyOwned::get(), <Error<T>>::ExceedMaxKittyOwned);
+			ensure!((to_owned.len() as u32) < T::MaxKittiesOwned::get(), <Error<T>>::ExceedMaxKittiesOwned);
 
 			let seller = kitty.owner.clone();
 
@@ -347,7 +353,7 @@ pub mod pallet {
 			// Performs this operation first because as it may fail
 			<KittiesOwned<T>>::try_mutate(&owner, |kitty_vec| {
 				kitty_vec.try_push(kitty_id)
-			}).map_err(|_| <Error<T>>::ExceedMaxKittyOwned)?;
+			}).map_err(|_| <Error<T>>::ExceedMaxKittiesOwned)?;
 
 			<Kitties<T>>::insert(kitty_id, kitty);
 			<KittyCnt<T>>::put(new_cnt);
@@ -389,7 +395,7 @@ pub mod pallet {
 
 			<KittiesOwned<T>>::try_mutate(to, |vec| {
 				vec.try_push(*kitty_id)
-			}).map_err(|_| <Error<T>>::ExceedMaxKittyOwned)?;
+			}).map_err(|_| <Error<T>>::ExceedMaxKittiesOwned)?;
 
 			Ok(())
 		}
