@@ -521,4 +521,10 @@ impl_runtime_apis! {
 			Ok(batches)
 		}
 	}
+
+	impl pallet_kitties_rpc_runtime_api::KittiesRuntimeApi<Block> for Runtime {
+		fn get_kitties_count() -> u64 {
+			SubstrateKitties::get_kitties_count()
+		}
+	}
 }

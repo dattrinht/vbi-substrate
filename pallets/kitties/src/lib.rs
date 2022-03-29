@@ -411,5 +411,15 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		pub fn get_kitties_count() -> u64 {
+			Self::kitty_cnt()
+		}
+
+		pub fn get_kitties_info(kitty_id: T::Hash) -> Kitty<T> {
+			let kitty = Self::kitties(&kitty_id).ok_or(<Error<T>>::KittyNotExist);
+
+			kitty.unwrap()
+		}
 	}
 }

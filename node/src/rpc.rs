@@ -13,6 +13,7 @@ use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use pallet_kitties_rpc_runtime_api;
 
 /// Full client dependencies.
 pub struct FullDeps<C, P> {
@@ -33,12 +34,13 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BlockBuilder<Block>,
+	C::Api: pallet_kitties_rpc_runtime_api::KittiesRuntimeApi<Block>,
 	P: TransactionPool + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 	use substrate_frame_rpc_system::{FullSystem, SystemApi};
 
-	use pallet_kitties_rpc::{ExampleRpc, Example};
+	use pallet_kitties_rpc::{KittiesRpc, PalletKittiesRpc};
 
 	let mut io = jsonrpc_core::IoHandler::default();
 	let FullDeps { client, pool, deny_unsafe } = deps;
@@ -47,7 +49,7 @@ where
 
 	io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(client.clone())));
 
-	io.extend_with(ExampleRpc::to_delegate(Example{}));
+	io.extend_with(KittiesRpc::to_delegate(PalletKittiesRpc::new(client.clone())));
 
 	// Extend this RPC with a custom API by using the following syntax.
 	// `YourRpcStruct` should have a reference to a client, which is needed
